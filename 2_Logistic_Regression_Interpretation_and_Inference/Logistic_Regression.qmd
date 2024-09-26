@@ -1568,7 +1568,9 @@ res.pca = FactoMineR::PCA(don_desbois,
 
 FactoMineR::dimdesc(res.pca, axes=c(1,2))
 ```
-We visualize the farm holdings as a bivariate plot on the first two components  of PCA (based on financial ratios), we use illustrative variable Y (0=”healthy”; 1=”failing”):
+
+We visualize the farm holdings as a bivariate plot on the first two components of PCA (based on financial ratios), we use illustrative variable Y (0=”healthy”; 1=”failing”):
+
 ```{r}
 #| code-fold: true
 # Similar to Desbois Fig 2. 
@@ -1583,7 +1585,7 @@ FactoMineR::plot.PCA(res.pca, axes=c(1, 2), choix="ind", habillage=30, invisible
 
 This plot which is comparable with:
 
-![](images/desbois_pca.png){fig-align="center"} 
+![](images/desbois_pca.png){fig-align="center"}
 
 Looking at this plot Desbois concludes that a simple classifier can be devised using the first PCA coordinate a classifier (setting a threshold at $PC_1 > 0.02$):
 
@@ -2318,6 +2320,7 @@ res_list <- readRDS("res_list.rds")
 res_list[[1]]$auc
 res_list[[2]]$auc
 ```
+
 # References
 
 ::: {#refs}

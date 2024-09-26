@@ -101,7 +101,7 @@ ggplot(data_mixture_example) +
 
 ```{r}
 #| code-fold: true
-new_mixture <- readRDS("../1_Scoring_and_Logistic_Regression/new_mixture.rds")
+new_mixture <- readRDS("C:/Users/Alex/Documents/GitHub/Scoring_Alex/teaching_Scoring/1_Scoring_and_Logistic_Regression/new_mixture.rds")
 ggplot(new_mixture[c(1:250,5001:5251),]) + # we plot only the first 250 of each class
     geom_point(aes(x = x1, y = x2, col = Y), shape = "o", size = 4, stroke = 2, show.legend = FALSE) +
     geom_point(data = mixture_means, aes(x = x1_means, y = x2_means, col =Y), size = 3, show.legend = FALSE) +
@@ -206,6 +206,7 @@ ggplot(data_mixture_example) +
                                 "inches"))
    
 ```
+
 Then, the region $x_2 \geq s_1$ is split at $x_1 = s_2 = 2.2$:
 
 ```{r, warning = FALSE}
@@ -228,7 +229,6 @@ ggplot(data_mixture_example) +
                                 "inches"))
    
 ```
-
 
 Then, the region $x_2 \geq s_1, \mbox{ } x_1 > s_2$ is split at $x_1 = s_3 = 3.1$:
 
@@ -464,6 +464,7 @@ We implement below a simple (only working with quantitative variables), naive (n
 First we define helper functions for the impurity measures:
 
 Entropy:
+
 ```{r}
 #| code-fold: show
 entropy <- function(tbl, y, verbose = FALSE){
@@ -475,6 +476,7 @@ entropy <- function(tbl, y, verbose = FALSE){
 ```
 
 and Gini:
+
 ```{r}
 #| code-fold: show
 gini <- function(tbl, y, verbose = FALSE){
@@ -489,7 +491,6 @@ gini <- function(tbl, y, verbose = FALSE){
   sum(p*(1-p))
 }
 ```
-
 
 Then we define a function returning for a given choice of continuous variable and split value, the impurity of the two children nodes and their weighted average impurity:
 
@@ -572,7 +573,9 @@ We plot for variables $x_1$ and $x_2$ the weighted average Gini index for each p
 ```{r}
 ggplot(test , aes(x=split_rule, y =imp_total, col = feature_split)) + geom_point()
 ```
+
 The best split in terms of impurity decrease is shown below:
+
 ```{r}
 (node_val <- test %>%
     dplyr::slice(which.min(imp_total)))
@@ -600,11 +603,11 @@ and taking the average value we verify that `rpart` splits on midpoint value:
    pull(midpoint))
 ```
 
-All of this nitpicking shows that each decision tree implementation is specific and when using a new one it is a good idea to check some details on simple cases. 
+All of this nitpicking shows that each decision tree implementation is specific and when using a new one it is a good idea to check some details on simple cases.
 
-As a matter of fact modern decision tree (boosting) algorithm optimize the way tree splitting is performed see for example [LightGBM](https://lightgbm.readthedocs.io/en/stable/Features.html#optimization-in-speed-and-memory-usage) using histograms/binning for numerical variables and [XGBoost](https://xgboost.readthedocs.io/en/stable/treemethod.html) using various methods from iterating over all values (`exact`) to histogram methods similar to LightGBM (`hist`). XGBoost developers even warn the package users that actual implementation of algorithm may differ from pure mathematical theory[^3].
+As a matter of fact modern decision tree (boosting) algorithm optimize the way tree splitting is performed see for example [LightGBM](https://lightgbm.readthedocs.io/en/stable/Features.html#optimization-in-speed-and-memory-usage) using histograms/binning for numerical variables and [XGBoost](https://xgboost.readthedocs.io/en/stable/treemethod.html) using various methods from iterating over all values (`exact`) to histogram methods similar to LightGBM (`hist`). XGBoost developers even warn the package users that actual implementation of algorithm may differ from pure mathematical theory[^2].
 
-[^3]: In [XGBoost documentation](https://xgboost.readthedocs.io/en/stable/treemethod.html) we find this disclaimer: 'However, as xgboost is largely driven by community effort, the actual implementations have some differences than pure math description. Result might be slightly different than expectation, which we are currently trying to overcome.'
+[^2]: In [XGBoost documentation](https://xgboost.readthedocs.io/en/stable/treemethod.html) we find this disclaimer: 'However, as xgboost is largely driven by community effort, the actual implementations have some differences than pure math description. Result might be slightly different than expectation, which we are currently trying to overcome.'
 
 So we have slightly modified our splitting algorithm implementation above (`max_impurity_decrease`) with the option to split on midpoints so that it matches the value from `CART/rpart`:
 
@@ -662,9 +665,7 @@ break_at <- function(node, min_leaf, midpoint){
 }
 ```
 
-The function below `conditional_split` looks at a provided children node (left or right) to check if it is terminal given a stopping rule (either the max tree depth is attained, or there is a single element in the node).
-If not the tree continues to grow (ie the recursion continues and the recursive function `grow_decision_tree` defined below is called). 
-It also computes metrics (number of observations per class, probabilities of classes 0-1, vote ...) to fill the given node with useful information:
+The function below `conditional_split` looks at a provided children node (left or right) to check if it is terminal given a stopping rule (either the max tree depth is attained, or there is a single element in the node). If not the tree continues to grow (ie the recursion continues and the recursive function `grow_decision_tree` defined below is called). It also computes metrics (number of observations per class, probabilities of classes 0-1, vote ...) to fill the given node with useful information:
 
 ```{r}
 #| code-fold: show
@@ -839,14 +840,14 @@ print_tree <- function(grown_tree, shift ='', precision = 3){
 }
 ```
 
-We test the recursive algorithm on the mixture data set: 
+We test the recursive algorithm on the mixture data set:
+
 ```{r}
 #| code-fold: show
 mixture_node <- grow_decision_tree(node, max_depth = 4, min_leaf = 7, midpoint = TRUE)
 ```
 
 We do the same specifying similar parameters to `rpart`:
-
 
 ```{r}
 #| code-fold: show
@@ -868,7 +869,7 @@ prp(mixture_example_CART, type = 2, extra = 4, fallen.leaves = TRUE, digits=4,
     node.fun = function(x, labs, digits, varlen) paste(labs, "\n", "B/O: ", x$frame$yval2[,2], " - ", x$frame$yval2[,3]))
 ```
 
-We compare our implementation with `rpart`: 
+We compare our implementation with `rpart`:
 
 ```{r}
 print_tree(mixture_node, '', 4)
@@ -878,8 +879,7 @@ print(mixture_example_CART)
 
 They are almost equivalent. The slight difference between our implementation and `rpart`: even if a split is admissible for terminal nodes improving the impurity, `rpart` seems to undo the split if it results in two terminal nodes predicting the same class).
 
-To further verify this point we use the `Python/scikit-learn` implementation of decision trees using `reticulate` package.
-This packages allows `R` to interact with `Python`, more details [here](# https://rstudio.github.io/reticulate) and [here](# https://www.r-bloggers.com/2020/04/how-to-run-pythons-scikit-learn-in-r-in-5-minutes/).
+To further verify this point we use the `Python/scikit-learn` implementation of decision trees using `reticulate` package. This packages allows `R` to interact with `Python`, more details [here](#%20https://rstudio.github.io/reticulate) and [here](#%20https://www.r-bloggers.com/2020/04/how-to-run-pythons-scikit-learn-in-r-in-5-minutes/).
 
 We first check and set our python environment:
 
@@ -888,11 +888,13 @@ We first check and set our python environment:
 library(reticulate)
 conda_list()
 ```
+
 ```{r, message=FALSE}
 #| include: false
 use_condaenv("teaching-python", required = TRUE)
 py_config()
 ```
+
 We import the needed python packages:
 
 ```{python}
@@ -903,12 +905,11 @@ from matplotlib import pyplot as plt
 from sklearn import tree
 ```
 
-
 We pass the data objects created within `R` chunks to `Python` using the `r` object (e.g. `r.x` would access to `x` variable created within `R` from `Python`):
 
 ```{r}
 #| code-fold: show
-Y_sk = data_mixture_example %>% select(Y)
+Y_sk = data_mixture_example |> select(Y)
 X_sk = data_mixture_example %>% select(x1,x2)
 ```
 
@@ -918,9 +919,11 @@ Y = r.Y_sk
 X.head()
 Y[0:5]
 ```
-We then fit a `scikit-learn` `DecisionTreeCLassifier` implementing a version of CART, for more details see [scikit-learn User Guide](https://scikit-learn.org/stable/modules/tree.html) and [Documentation ](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html#sklearn.tree.DecisionTreeClassifier). 
+
+We then fit a `scikit-learn` `DecisionTreeCLassifier` implementing a version of CART, for more details see [scikit-learn User Guide](https://scikit-learn.org/stable/modules/tree.html) and [Documentation](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html#sklearn.tree.DecisionTreeClassifier).
 
 We use similar parameters as before:
+
 ```{python}
 #| code-fold: show
 clf = tree.DecisionTreeClassifier(max_depth=4, min_samples_leaf=7, min_samples_split=7, random_state=0)
@@ -928,6 +931,7 @@ clf.fit(X, Y)
 ```
 
 We then visualize the resulting decision tree:
+
 ```{python}
 #| code-fold: show
 plt.figure(figsize=(25,17))
@@ -945,9 +949,7 @@ tree.export_graphviz(clf, 'images/check_tree_mixture.dot',
 system("dot -Tsvg images/check_tree_mixture.dot -o images/check_tree_mixture.svg")
 ```
 
-We verify that our toy implementation of `CART` matches the `scikit-learn` implementation on the Mixture data set with comparable parameters (note that the default colors from `graphviz` are the opposite of the Mixture data set, ie Class 0 / BLUE filled in orange, Class 1 / ORANGE filled in blue):
-![](images/check_tree_mixture.svg)
-It is comparable to our implementation:
+We verify that our toy implementation of `CART` matches the `scikit-learn` implementation on the Mixture data set with comparable parameters (note that the default colors from `graphviz` are the opposite of the Mixture data set, ie Class 0 / BLUE filled in orange, Class 1 / ORANGE filled in blue): ![](images/check_tree_mixture.svg) It is comparable to our implementation:
 
 ```{r}
 print_tree(mixture_node, '', 4)
@@ -956,6 +958,7 @@ print_tree(mixture_node, '', 4)
 We do the same job with the `Iris` data set which is a multivariate data set used and made famous by the British statistician and biologist Ronald Fisher in his 1936 paper about linear discriminant analysis, we restrict to a binary classification problem excluding the `setosa` family.
 
 We fit a decision tree for with max depth 2:
+
 ```{r}
 data(iris)
 
@@ -1025,15 +1028,15 @@ plt.savefig('images/check_tree_iris.svg')
 
 ## Building strategy - Pruning
 
-The tree-building process described just above is likely to produce good predictions on the training set, but is also likely to overfit the data, leading to poor predictions on testing set or new data. This is because the resulting tree might be too complex. 
+The tree-building process described just above is likely to produce good predictions on the training set, but is also likely to overfit the data, leading to poor predictions on testing set or new data. This is because the resulting tree might be too complex.
 
-In an extreme case, if we do not restrict the tree depth and allow a low minimum number of observations per leaf, many observations could be alone in their own region/node. 
+In an extreme case, if we do not restrict the tree depth and allow a low minimum number of observations per leaf, many observations could be alone in their own region/node.
 
 Conversely, a smaller tree with fewer splits/nodes/regions might underfit, missing key patterns in the data.
 
 The right balance leading to lower variance and better interpretation at the cost of a little bias.
 
-We can see the number of nodes or tree size as a parameter allowing to tune the model complexity. 
+We can see the number of nodes or tree size as a parameter allowing to tune the model complexity.
 
 We have to select this parameter.
 
@@ -1099,7 +1102,7 @@ data_rotated <- tibble(Y, x1 = X_rotated[,1], x2 = X_rotated[,2])
 ggplot(data_rotated %>% mutate(Y=as.factor(Y)), aes(x=x1, y=x2, col = Y)) + geom_point()
 ```
 
-Fit a decision tree on the rotated dataset. 
+Fit a decision tree on the rotated dataset.
 
 Plot and comment the decision boundary in terms of generalization/test error.
 
@@ -1107,21 +1110,19 @@ Can you do better? Think of PCA for example.
 
 # Ensemble methods - Boosting
 
-Boosting is a machine learning technique developed in the nineties. 
-It was originally introduced for binary classification problems and it has been extended to other supervised learning problems (multiclass, regression, ranking, survival). 
+Boosting is a machine learning technique developed in the nineties. It was originally introduced for binary classification problems and it has been extended to other supervised learning problems (multiclass, regression, ranking, survival).
 
 The core idea behind Boosting is to combine the predictions of several "weak" classifiers (ie slighlty better than random classifiers) to form a more robust and accurate model.
 
-We start by introducing `AdaBoost` which was (one of[^2]) the first successful implementation of the Boosting idea, introduced by Freund and Schapire in @adaboost1996.
+We start by introducing `AdaBoost` which was (one of[^3]) the first successful implementation of the Boosting idea, introduced by Freund and Schapire in @adaboost1996.
 
-[^2]: For example in the context signal processing, the matching pursuit algorithm developed by Mallat and Zhang in 1993 is equivalent to a Boosting algorithm (Mallat, S., Zhang, Z. (1993). Matching pursuits with time-frequency dictionaries)
+[^3]: For example in the context signal processing, the matching pursuit algorithm developed by Mallat and Zhang in 1993 is equivalent to a Boosting algorithm (Mallat, S., Zhang, Z. (1993). Matching pursuits with time-frequency dictionaries)
 
 ## Adaboost
 
 The algorithm is described for example in Chapter 1 of @boosting2012 (Algorithm 1.1):
 
-![](images/adaboost_algo.png){fig-align="center"}
-or in Chapter 10 of @hastie2009 (Algorithm 10.1):
+![](images/adaboost_algo.png){fig-align="center"} or in Chapter 10 of @hastie2009 (Algorithm 10.1):
 
 ![](images/adaboost_algo_esl.png){fig-align="center"}
 
@@ -1134,6 +1135,7 @@ A toy example is also introduced in the book, showing graphically the first thre
 Following this algorithm description or pseudo code we implement a simplified version of AdaBoost using `rpart` decision trees as base/weak classifiers.
 
 We implement here a version with stumps (ie decision tree with depth 1), but any kind of weak learner can be used:
+
 ```{r}
 #| code-fold: show
 # Function implementing the original AdaBoost algorithm (Algorithm 1.1)
@@ -1242,8 +1244,8 @@ predict_original_adaboost <- function(fitted_adaboost, new_data, num_tree = -1){
 }
 ```
 
-We then illustrate AdaBoost on the Mixture data set. 
-We first convert the target $Y$ to be in $\{-1,1\}$ then fit AdaBoost with $3$ iterations:
+We then illustrate AdaBoost on the Mixture data set. We first convert the target $Y$ to be in $\{-1,1\}$ then fit AdaBoost with $3$ iterations:
+
 ```{r}
 data_ada <- data_mixture_example %>% mutate(Y=as.factor(if_else(Y==0, -1, 1)))
 adaboost_M <- fit_original_adaboost(data_ada, 3)
@@ -1257,10 +1259,9 @@ adaboost_M <- fit_original_adaboost(data_ada, 3)
 # sign(g)==predict_original_adaboost(adaboost_M, data_ada %>% select(x1,x2))
 ```
 
-
 We represent weak learners (here decision tree stumps) boundary decisions, as well as re-weighted data after each step:
 
-- Step 1:
+-   Step 1:
 
 ```{r}
 # install.packages("remotes")
@@ -1289,7 +1290,9 @@ scale_colour_manual(aesthetics = c('colour', 'fill'), values = c("dodgerblue", "
 scale_size(range = c(0, 5), limits = c(0, 10), breaks = seq(0, 10), guide='none') +
 ggtitle(glue::glue("Reweighted data after step {step}"))) 
 ```
-- Step 2:
+
+-   Step 2:
+
 ```{r}
 step <- 2
 variable_split <- rownames(adaboost_M$weak_learners[[step]]$splits)
@@ -1310,7 +1313,8 @@ scale_colour_manual(aesthetics = c('colour', 'fill'), values = c("dodgerblue", "
 scale_size(range = c(0, 5), limits = c(0, 10), breaks = seq(0, 10), guide='none') +
 ggtitle(glue::glue("Reweighted data after step {step}"))) 
 ```
-- Step 3:
+
+-   Step 3:
 
 ```{r}
 step <- 3
@@ -1332,7 +1336,9 @@ scale_colour_manual(aesthetics = c('colour', 'fill'), values = c("dodgerblue", "
 scale_size(range = c(0, 5), limits = c(0, 10), breaks = seq(0, 10), guide='none') +
 ggtitle(glue::glue("Reweighted data after step {step}"))) 
 ```
+
 We run more iterations of AdaBoost
+
 ```{r}
 # Prediction function used to classify areas on the grid and imply the decision boundary
 predict_oracle <- function(x1, x2){
@@ -1347,7 +1353,6 @@ predict_oracle <- function(x1, x2){
 
 predict_oracle_V <- Vectorize(predict_oracle)
 ```
-
 
 ```{r}
 tree_number <- 100
@@ -1562,7 +1567,6 @@ ada_error_rate <- bind_cols(new_mixture,
     pull(l01))
 ```
 
-
 ## Derivation of AdaBoost: statistical view
 
 In @fht2000, authors derive AdaBoost as a Forward Stagewise Additive Model (FSAM) that minimizes the exponential loss. They also develop the approach in @hastie2009 (Chapter 10, Boosting and Additive Trees).
@@ -1573,12 +1577,9 @@ First they remark that the Adaboost classifier after $M$ iterations is related t
 
 $$
 H(x) = \text{sign}(f_M(x))
-$$
-where:
-$$
+$$ where: $$
 f_M(x) = \sum_{m=1}^M \alpha_m h(x,\gamma_m)
-$$
-$\alpha$ are the expansion coefficients or weights and $h(x,\gamma_m)$ are the "basis" functions or "learners", usually "simple" functions of $x$ parameterized by $\gamma$. 
+$$ $\alpha$ are the expansion coefficients or weights and $h(x,\gamma_m)$ are the "basis" functions or "learners", usually "simple" functions of $x$ parameterized by $\gamma$.
 
 We can express $f$ iteratively as:
 
@@ -1592,12 +1593,11 @@ Such additive models are fit by minimizing a loss function of the training data 
 
 $$
 \underset{\{\alpha_m, \gamma_m\}_1^M}{\operatorname{min}}\sum_{i=1}^n L(y_i,\sum_{m=1}^M \alpha_m h(x_i,\gamma_m)) 
-$$
-Such optimization is in general intractable. A "greedy" approach is usually taken to approximate a solution.
+$$ Such optimization is in general intractable. A "greedy" approach is usually taken to approximate a solution.
 
 ### Forward Stagewise Additive Model (FSAM)
 
-To simplify the preceding optimization, a "forward stagewise"  or "greedy" approach is taken.
+To simplify the preceding optimization, a "forward stagewise" or "greedy" approach is taken.
 
 At a given iteration $m$, the expansion $f_{m-1}$ is fixed and we only optimize the weights $\alpha_m$ and current "learner" parameters $\gamma_m$. $f_{m}$ is obtained and the procedure repeats. Note that in the next step $f_{m}$ is fixed and we only optimize the weights and parameters for learner $m+1$.
 
@@ -1607,8 +1607,7 @@ Let us first define or introduce the exponential loss:
 
 $$
 L(y,f(x)) = \exp(-yf(x)) = \exp(-\text{margin})
-$$
-Given a classifier $f(x)$, it is usual to define the margin as $yf(x)$.
+$$ Given a classifier $f(x)$, it is usual to define the margin as $yf(x)$.
 
 We then show that AdaBoost is equivalent to fitting FSAM for the exponential loss.
 
@@ -1624,15 +1623,13 @@ $$
 
 where $\omega_{m,i}=\exp(-y_i f_{m-1}(x_i))$ acts as a weight and does not depend on $(\alpha, \gamma)$.
 
-The last expression rewrites:
-$$
+The last expression rewrites: $$
 \begin{align*}
 \sum_{i=1}^n \omega_{m,i}\exp(-y_i \alpha h(x_i,\gamma)) &=e^{-\alpha}\sum_{i=1}^n \omega_{m,i}\mathbf 1_{y_i=h(x_i,\gamma)}+ e^{\alpha}\sum_{i=1}^n \omega_{m,i} 1_{y_i\neq h(x_i,\gamma)}\\
  &= (e^{\alpha}-e^{-\alpha})\sum_{i=1}^n \omega_{m,i} 1_{y_i\neq h(x_i,\gamma)} + e^{-\alpha}\sum_{i=1}^n \omega_{m,i}\\
  &= (e^{\alpha}-e^{-\alpha})\Omega_{m,err} + e^{-\alpha}\Omega_{m}
 \end{align*} 
-$$
-Having in mind that the term $\Omega_m =\sum_{i=1}^n \omega_{m,i}$ does not depend on $(\alpha, \gamma)$, for any $\alpha>0$ we have $e^{\alpha}-e^{-\alpha}>0$, so solving for $\gamma$ the problem:
+$$ Having in mind that the term $\Omega_m =\sum_{i=1}^n \omega_{m,i}$ does not depend on $(\alpha, \gamma)$, for any $\alpha>0$ we have $e^{\alpha}-e^{-\alpha}>0$, so solving for $\gamma$ the problem:
 
 $$
 \begin{align*}
@@ -1647,10 +1644,9 @@ $$\begin{align*}
 \gamma_m &=\underset{\gamma}{\operatorname{argmin}}\sum_{i=1}^n \omega_{m,i} 1_{y_i\neq h(x_i,\gamma)}\\
          &=\underset{\gamma}{\operatorname{argmin}}\Omega_{m,err}
 \end{align*}
-$$
-which does not depend on $\alpha_m$.
+$$ which does not depend on $\alpha_m$.
 
-This problem is specific to the base learners $h(x, \gamma)$ at stake, but amounts to solving a weighted (with $\omega_{m,i}$) classification problem. 
+This problem is specific to the base learners $h(x, \gamma)$ at stake, but amounts to solving a weighted (with $\omega_{m,i}$) classification problem.
 
 For example when $h(x, \gamma)$ are decision trees, we obtain $\gamma_m$ by fitting a tree on the weighted training data.
 
@@ -1671,13 +1667,11 @@ $$
 \alpha  &=\frac{1}{2}\log(\frac{\Omega_{m}}{\Omega_{m,err}}-1) \\
         &=\frac{1}{2}\log(\frac{1-\epsilon_{m}}{\epsilon_{m}}) 
 \end{align*}
-$$
-where:
+$$ where:
 
 $$
 \epsilon_{m}=\frac{\Omega_{m,err}}{\Omega_{m}}= \frac{\sum_{i=1}^n \omega_{m,i} 1_{y_i\neq h(x_i,\gamma_m)}}{\sum_{i=1}^n \omega_{m,i}}
-$$
-is a weighted misclassification error.
+$$ is a weighted misclassification error.
 
 We retrieve the expression of the weights in AdaBoost algorithm $\alpha_m=\frac{1}2{}\log(\frac{1-\epsilon_{m}}{\epsilon_{m}})$ from Freund and Schapire.
 
@@ -1689,21 +1683,19 @@ We now look at the update of weights $\omega_{m+1,i}=\exp(-y_i f_{m}(x_i))$ afte
 
 $$
 \omega_{m+1,i}=\omega_{m,i}\exp(-y_i \alpha_m h(x_i,\gamma_m))
-$$
-which looks like the weight in Freund & Schapire Algortihm 1.1.
+$$ which looks like the weight in Freund & Schapire Algortihm 1.1.
 
-It can be rewritten as in @hastie2009, defining $\hat\alpha_m=2\alpha_m=\log(\frac{1-\epsilon_{m}}{\epsilon_{m}})$: 
+It can be rewritten as in @hastie2009, defining $\hat\alpha_m=2\alpha_m=\log(\frac{1-\epsilon_{m}}{\epsilon_{m}})$:
 
 $$
 \omega_{m+1,i}=\omega_{m,i}\exp(\hat\alpha_m 1_{y_i\neq h(x_i,\gamma_m)})\exp(-\frac{\hat\alpha_m}{2})
-$$
-using the fact that $-y_i h(x_i,\gamma_m) =2\times1_{y_i\neq h(x_i,\gamma_m)})+1$.
+$$ using the fact that $-y_i h(x_i,\gamma_m) =2\times1_{y_i\neq h(x_i,\gamma_m)})+1$.
 
-In the implementation of AdaBoost algorithm proposed before `fit_original_adaboost`, we tested both Freund & Schapire and @hastie2009 formulations which perform identically. 
+In the implementation of AdaBoost algorithm proposed before `fit_original_adaboost`, we tested both Freund & Schapire and @hastie2009 formulations which perform identically.
 
-Note that this FSAM view of AdaBoost was derived years after the Algorithm was proposed. Motivations and justifications of the original algorithm were not directly linked to an optimization / minimization of risk problem, see for example @boosting2012. But at some point, the use of exponential function in the algorithm has allow tractable formulas, allowing for example to express simple recursions. 
+Note that this FSAM view of AdaBoost was derived years after the Algorithm was proposed. Motivations and justifications of the original algorithm were not directly linked to an optimization / minimization of risk problem, see for example @boosting2012. But at some point, the use of exponential function in the algorithm has allow tractable formulas, allowing for example to express simple recursions.
 
-### Loss functions for binary classification / margin [DRAFT]
+### Loss functions for binary classification / margin \[DRAFT\]
 
 #### Theoretical minimizer for exponential loss
 
@@ -1717,8 +1709,7 @@ f^*(x)&=\underset{f}{\operatorname{argmin}}\mathbb{E}[\ell(Y,f(x))|x]\\
       &=\underset{f}{\operatorname{argmin}}\mathbb{E}[e^{-Yf(x)}|x] \\
       &=\frac{1}{2}\log(\frac{\mathbb{P}[Y=1|X=x)]}{\mathbb{P}[Y=-1|X=x)]})
 \end{align*}
-$$
-So the $f_M$ estimated by AdaBoost approximates half the log odds of the  data generating distribution $\mathbf P_{\mathrm X \times \mathrm Y}$.
+$$ So the $f_M$ estimated by AdaBoost approximates half the log odds of the data generating distribution $\mathbf P_{\mathrm X \times \mathrm Y}$.
 
 Conversely: $\mathbb{P}[Y=1|X=x)]=\frac{e^{f^{*}(x)}}{e^{-f^{*}(x)}+e^{f^{*}(x)}}=\frac{1}{1+e^{-2f^{*}(x)}}$
 
@@ -1734,14 +1725,12 @@ $$
 \end{align*} 
 $$
 
-
 $$
 \ell_{logistic}(y,\eta(x)) = -y\log(\eta(x))-(1-y)\log(1-\eta(x))=\left\{ \begin{array}{ll} 
     -\log(\eta) &  \mbox{if } y = 1\cr
     -\log(1-\eta) &  \mbox{if } y = 0\cr
 \end{array} \right.
-$$
-Here the authors parameterize the binomial probabilities by:
+$$ Here the authors parameterize the binomial probabilities by:
 
 $p(x)=\frac{e^{f(x)}}{e^{f(x)}+e^{-f(x)}}=\frac{1}{1+e^{-2f(x)}}$
 
@@ -1763,10 +1752,9 @@ $$
 \end{array} = \log(1+e^{-2Yf(x)})\right.
 $$
 
-#### Convex surrogates for 0-1 loss [DRAFT]
+#### Convex surrogates for 0-1 loss \[DRAFT\]
 
-As we have seen before for the exponential loss, we can rewrite loss functions for binary classification in terms of margin.
-Given a classifier $f(x)$, margin is defined as $yf(x)$.
+As we have seen before for the exponential loss, we can rewrite loss functions for binary classification in terms of margin. Given a classifier $f(x)$, margin is defined as $yf(x)$.
 
 Then the loss function assigning a small value to positive margins (ie correct classifications) and a large value to negative margins (ie wrong classifications).
 
@@ -1804,11 +1792,9 @@ $$
 f^*=\underset{f}{\operatorname{argmin}}\mathrm R(f)=\underset{f}{\operatorname{argmin}}\mathbb{E}[L(Y,f(X))]
 $$
 
-or for each $x$ in $\mathrm X$:
-$$
+or for each $x$ in $\mathrm X$: \$\$
 
-f^*(x)=\underset{f}{\operatorname{argmin}}\mathrm R(f(x))=\underset{f}{\operatorname{argmin}}\mathbb{E}[L(Y,f(x))|X=x]
-$$ 
+f\^\*(x)=\underset{f}{\operatorname{argmin}}\mathrm R(f(x))=\underset{f}{\operatorname{argmin}}\mathbb{E}\[L(Y,f(x))\|X=x\] \$\$
 
 and more practically at each point of the given training data $x_i$, $i = 1, \cdots ,n$.
 
@@ -1820,8 +1806,7 @@ $$
 
 with $f^{m}(x)$ a step in the function space, similar to a gradient boosting or Newton Raphson step in an usual iterative algorithm.
 
-Indeed starting from an initial guess $f^0$, one sequentially add steps:
-$$
+Indeed starting from an initial guess $f^0$, one sequentially add steps: $$
 f_M(x) = \sum_{m=0}^M f^m(x)
 $$
 
@@ -1839,37 +1824,31 @@ $$
 
 giving a step $f^m(x) =-\rho_m \text{grad}^m(x)$
 
-
 Similarly a Newton Raphson method in function space can be defined. The problem is solved at each step $m$:
 
 $$
 \left.\frac{\partial \mathbb{E}[L(Y,f_{m-1}(x)+f^m(x))|X=x]}{\partial f^m(x)}\right.=0
-$$
-using a second-order expansion of $\mathbb{E}[L(Y,f_{m-1}(x)+f^m(x))|X=x]\approx\mathbb{E}[L(Y,f_{m-1}(x)|X=x]+\text{grad}^m(x)f^m(x)+\frac{1}{2}\text{hessian}^m(x)f^m(x)^2$
+$$ using a second-order expansion of $\mathbb{E}[L(Y,f_{m-1}(x)+f^m(x))|X=x]\approx\mathbb{E}[L(Y,f_{m-1}(x)|X=x]+\text{grad}^m(x)f^m(x)+\frac{1}{2}\text{hessian}^m(x)f^m(x)^2$
 
 where hessian is:
 
 $$
 \text{hessian}^m(x)=\left.\frac{\partial^2\mathrm R(f)}{\partial f(x)^2}\right|_{f(x)=f_{m-1}(x)}=\left.\frac{\partial^2 \mathbb{E}[L(Y,f(x))|X=x]}{\partial f(x)^2}\right|_{f(x)=f_{m-1}(x)} =  \mathbb{E} \left[\frac{\partial^2 L(Y,f(x))}{\partial f(x)^2}|X=x\right]_{f(x)=f_{m-1}(x)}
-$$
-Thus:
+$$ Thus:
 
 $$
 \left.\frac{\partial \mathbb{E}[L(Y,f_{m-1}(x)+f^m(x))|X=x]}{\partial f^m(x)}\right.\approx \text{grad}^m(x)+\text{hessian}^m(x)f^m(x)=0
-$$
-giving a Newton-Raphson step in function space:
+$$ giving a Newton-Raphson step in function space:
 
 $$
 f^m(x) = -\frac{\text{grad}^m(x)}{\text{hessian}^m(x)}
 $$
 
-
 ## Practical Implementations
 
 We first start by implementing the original Logitboost algorithm as described in @fht2000:
 
-![](images/logitboost_algo.png){fig-align="center"}
-It is a Forward Stagewise Additive Method, at each iteration a Newton step is perform, in the context of Decision Trees, this step is equivalent to fitting a Regression Tree on weighted residuals.
+![](images/logitboost_algo.png){fig-align="center"} It is a Forward Stagewise Additive Method, at each iteration a Newton step is perform, in the context of Decision Trees, this step is equivalent to fitting a Regression Tree on weighted residuals.
 
 We check our implementation against `xgboost`
 
@@ -2068,7 +2047,6 @@ abs(sum(pred_xgb)-sum(logitboost_mixture$probs))<1e-6
 
 We show LogitBoost decision boundary, here after $100$ iterations using our version of the algorithm:
 
-
 ```{r}
 #| code-fold: show
 tree_number <- 100
@@ -2180,8 +2158,6 @@ grid <- bind_cols(grid, tibble(predict_logitboost = predict(xgboost_M, as.matrix
           ) +
     guides(stroke="none"))
 ```
-
-
 
 Gradient Boosting version of LogitBoost
 
@@ -2437,6 +2413,7 @@ mart_error_rate <- bind_cols(new_mixture,
     summarise(l01 = mean(l01)) %>% 
     pull(l01))
 ```
+
 ```{r}
 tree_number_predict <- 50
 
@@ -2619,8 +2596,6 @@ misclass_plot <- bind_rows(misclass_curve) %>%
     labs(col = NULL, linetype=NULL))
 ```
 
-
-
 TODO comparing for various values of shrink / learning rate parameter
 
 ```{r}
@@ -2738,17 +2713,14 @@ We then investigate a more recent version of LogitBoost algorithm, allowing to c
 
 ![](images/robust_logitboost_gain1.png){fig-align="center"}
 
-![](images/robust_logitboost_gain2.png){fig-align="center"}
-![](images/xgboost_gain.png){fig-align="center"}
-The underlying idea common to both Robust LogitBoost and `xgboost` is to take advantage of some simplifications that occur for Gradient Boosting / Newton methods when base learners are Decision Trees. In particular it is possible to show that the problem is equivalent to fitting a Decision Tree using a novel splitting formula, more precisely using a Sum of Squares criterion (Regression tree) involving the gradient and the hessian of any convex loss.
+![](images/robust_logitboost_gain2.png){fig-align="center"} ![](images/xgboost_gain.png){fig-align="center"} The underlying idea common to both Robust LogitBoost and `xgboost` is to take advantage of some simplifications that occur for Gradient Boosting / Newton methods when base learners are Decision Trees. In particular it is possible to show that the problem is equivalent to fitting a Decision Tree using a novel splitting formula, more precisely using a Sum of Squares criterion (Regression tree) involving the gradient and the hessian of any convex loss.
 
-In the @hastie2009, authors suggest that AdaBoost or any comparable FSAM can be fitted using specialized trees (ie specific gain used to split), but prefer to follow the approach of Friedman's Gradient Boosting:
-![](images/ESL_specialized_trees.png){fig-align="center"}
-
+In the @hastie2009, authors suggest that AdaBoost or any comparable FSAM can be fitted using specialized trees (ie specific gain used to split), but prefer to follow the approach of Friedman's Gradient Boosting: ![](images/ESL_specialized_trees.png){fig-align="center"}
 
 We implement here the Ping Li Robust LogitBoost method, re-using our implementation of a Decision Tree at the start of the course.
 
 First defining specialized `xgboost` / Robust LogitBoost gains (using Gradient, Hessian, $\lambda$):
+
 ```{r}
 #| code-fold: show
 xgboost_gain <- function(tbl, y, verbose = FALSE){
@@ -2790,7 +2762,6 @@ gain_sum_square <- function(tbl_node, y_name, x_name, split_value, min_leaf = 5)
                 "impurity_total" = impurity_left + impurity_right))
 }
 ```
-
 
 ```{r}
 #| code-fold: show
@@ -2850,12 +2821,12 @@ test <- max_gain(tbl_node, y_name, x_names, min_leaf = 1, midpoint = TRUE)
     arrange(imp_total))
 ```
 
-
 We plot for variables $x_1$ and $x_2$ the `xgboost` gain for each possible split of data:
 
 ```{r}
 ggplot(test , aes(x=split_rule, y =imp_total, col = feature_split)) + geom_point()
 ```
+
 ```{r}
 #| code-fold: show
 tbl_node <- data_mixture_example %>%
@@ -2900,9 +2871,7 @@ break_at_boost <- function(node, min_leaf, midpoint, is_root){
 }
 ```
 
-The function below `conditional_split_boost` looks at a provided children node (left or right) to check if it is terminal given a stopping rule (either the max tree depth is attained, or there is a single element in the node).
-If not the tree continues to grow (ie the recursion continues and the recursive function `grow_decision_tree_boost` defined below is called). 
-It also computes metrics (number of observations per class, probabilities of classes 0-1, vote ...) to fill the given node with useful information:
+The function below `conditional_split_boost` looks at a provided children node (left or right) to check if it is terminal given a stopping rule (either the max tree depth is attained, or there is a single element in the node). If not the tree continues to grow (ie the recursion continues and the recursive function `grow_decision_tree_boost` defined below is called). It also computes metrics (number of observations per class, probabilities of classes 0-1, vote ...) to fill the given node with useful information:
 
 ```{r}
 #| code-fold: show
@@ -3013,7 +2982,8 @@ print_regression_tree <- function(grown_tree, shift ='', precision = 3){
 }
 ```
 
-We test the recursive algorithm on the mixture data set (using stumps, ie `max_depth` = 1): 
+We test the recursive algorithm on the mixture data set (using stumps, ie `max_depth` = 1):
+
 ```{r}
 mixture_node_boost <- grow_decision_tree_boost(node, max_depth = 1, min_leaf = 1, midpoint = TRUE)
 ```
@@ -3044,6 +3014,7 @@ xgb_trees_depth2[1:4]
 ```
 
 Checking for depth 2 weak learners:
+
 ```{r}
 mixture_node_boost <- grow_decision_tree_boost(node, max_depth = 2, min_leaf = 1, midpoint = TRUE)
 print_regression_tree(mixture_node_boost)
@@ -3062,6 +3033,7 @@ xgb_depth2 <- xgboost(data = as.matrix(data_mixture_example %>% select(x1, x2)),
 xgb_trees_depth2 <- xgb.dump(xgb_depth2, with_stats = TRUE)
 tibble(xgb_trees_depth2[1:8])
 ```
+
 ```{r}
 #| code-fold: show
 # Recursive function to print tree
@@ -3140,6 +3112,7 @@ data_train %>%
 ```
 
 Implementing Ping Li's robust logitboost (ie almost xgboost)
+
 ```{R}
 fit_robust_logitboost <- function(data_train, M, min_leaf=1, max_depth = 1, lambda=0, verbose=FALSE){
   # expect data with Y column in {0, 1}, with only additional predictors (as we will use formula Y ~ .)
@@ -3264,8 +3237,6 @@ abs(sum(pred_xgb)-sum(logitboost_mixture$probs))<1e-6
 
 ```
 
-
-
 ```{r}
 #https://scikit-learn.org/stable/auto_examples/ensemble/plot_gradient_boosting_regularization.html#sphx-glr-auto-examples-ensemble-plot-gradient-boosting-regularization-py
 ```
@@ -3297,6 +3268,7 @@ for (i in 1:length(l)) {
 ### Checking our implementation vs R packages and scikit-learn
 
 Check using package `ada`:
+
 ```{r}
 library(ada)
 check_ada <- ada::ada(Y~., data = data_ada, iter=200, bag.frac=1, type="discrete", nu = 1,
@@ -3338,8 +3310,8 @@ ada_error_rate <- bind_cols(new_mixture,
     pull(l01))
 ```
 
-
 Check using package `JOUSBoost`:
+
 ```{r}
 library(JOUSBoost)
 check_ada <- JOUSBoost::adaboost(as.matrix(data_ada %>% select(x1, x2)),
@@ -3379,7 +3351,6 @@ ada_error_rate <- bind_cols(new_mixture,
     pull(l01))
 ```
 
-
 Check using `Python` package `scikit-learn`:
 
 ```{r}
@@ -3392,7 +3363,6 @@ X = r.X_sk.to_numpy()
 Y = r.Y_sk.values.ravel().astype(int)
 Y[0:5]
 ```
-
 
 ```{python}
 # adapted from sciki-learn examples
@@ -3452,17 +3422,15 @@ plt.title(f"Decision Boundary ({M} estimators)")
 plt.show()
 ```
 
-
 ## Gradient Boosting (Machines)
 
-breaktrough 
+breaktrough
 
-Showing importance of trees  
+Showing importance of trees
 
-Using learning rate eta <1 improves testing error
+Using learning rate eta \<1 improves testing error
 
-plus introduction of Relative importance of input variables and PDP (Partial dependence plots)
-<!--  in the original CART 5.2.2  --- -->
+plus introduction of Relative importance of input variables and PDP (Partial dependence plots) <!--  in the original CART 5.2.2  --- -->
 
 <!-- In some data, the classes are naturally separated by hyperplanes not perpendicular to the coordinate axes. These problems are difficult for the unmodified tree structured procedure and result in large trees as the algorithm attempts to approximate the hyperplanes by multidimensional rectangular regions. To cope with such situations, the basic structure has been enhanced to allow a search for best splits over linear combinations of variables.--- -->
 
