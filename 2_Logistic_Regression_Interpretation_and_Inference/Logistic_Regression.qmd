@@ -1233,7 +1233,7 @@ Without entering to much details in this section, Ridge does a proportional shri
 We use here the Mixture data set to give further intuition about Ridge/Lasso penalties:
 
 ```{r}
-data_mixture_example <- readRDS("../1_Scoring_and_Logistic_Regression/data_mixture_example.rds")
+data_mixture_example <- readRDS("C:/Users/Alex/Documents/GitHub/Scoring_Alex/teaching_Scoring/1_Scoring_and_Logistic_Regression/data_mixture_example.rds")
 y = as.numeric(data_mixture_example$Y)-1
 X = as.matrix(data_mixture_example %>% select(x1,x2))
 ```
@@ -1429,7 +1429,7 @@ Explore the data set (the full case study is presented in @desbois2008), you mig
 # package used to import spss file
 library(foreign)
 
-don_desbois <- read.spss("../data/Agriculture Farm Lending/desbois.sav",
+don_desbois <- read.spss("C:/Users/Alex/Documents/GitHub/Scoring_Alex/teaching_Scoring/data/Agriculture Farm Lending/desbois.sav",
                        to.data.frame = TRUE) %>% as_tibble()
 don_desbois <- don_desbois %>%
     mutate(Y = as.factor(if_else(DIFF=='healthy', 0, 1))) %>%
@@ -1620,6 +1620,10 @@ summary(glm_desbois_full)
 
 The coefficient of `r17` is `r round(as.numeric(coef(glm_desbois_full)["r17"]),2)`. Hence an increase of `r17` by 1% increases odds for default by a factor of `r round(exp(as.numeric(coef(glm_desbois_full)["r17"]*0.01)),2)`.
 
+as logit(p\_{\\beta}(x_i)) = x_i\^T \beta
+
+thus a 1% increase -\> $0.01 * 45.338851 = 0.4533$, but need to take $exp()$ as this is $logit(p_b)$, so $\Delta p_{\beta} = exp(0.4533) = 1.5725$
+
 ### Tests
 
 Considering the model `Y~.`, is the effect of variable `r36` significant? Using Wald test. Using Likelihood Ratio Test.
@@ -1645,10 +1649,10 @@ aod::wald.test(b = coef(glm_desbois_full), Sigma = vcov(glm_desbois_full), Terms
 ```{r}
 #| code-fold: show
 # manually computing from beta/hessian
-beta_r17 <- sum_desbois$coefficients[40,1]
-stdev_r17 <- sum_desbois$coefficients[40,2]
+beta_r37 <- sum_desbois$coefficients[40,1]
+stdev_r37 <- sum_desbois$coefficients[40,2]
 
-wald <- beta_r17 ^ 2 / stdev_r17 ^ 2
+wald <- beta_r37 ^ 2 / stdev_r37 ^ 2
 1-pchisq(wald, df = 1)
 
 z_val <- sum_desbois$coefficients[40,3]
