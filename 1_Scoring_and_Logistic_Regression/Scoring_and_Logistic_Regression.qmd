@@ -152,13 +152,19 @@ $\eta(x)$ is called the regression function.
 
 Given $f$ a classifier:
 
-Using 0-1 loss definition: $$
+Using 0-1 loss definition: 
+
+$$
 \begin{align*}
 \mathrm R(f)  &= \mathbb{E}_{X,Y}[\ell(Y,f(X))] \\
 &=\mathbb{E}_{X,Y}[\mathbf 1_{Y=1} \mathbf 1_{f(X)=0} + \mathbf 1_{Y=0} \mathbf 1_{f(X)=1} ] \\
 &= \mathbb{E}_{X}[\mathbb{E}_{Y|X}[\mathbf 1_{Y=1} \mathbf 1_{f(X)=0} + \mathbf 1_{Y=0} \mathbf 1_{f(X)=1}|X]]  \\ 
 \end{align*}
-$$ Using "Tower Rule" conditioning on $X$ then using $\eta(X)$ definition: $$
+$$
+
+Using "Tower Rule" conditioning on $X$ then using $\eta(X)$ definition: 
+
+$$
 \begin{align*}
 &= \mathbb{E}_{X}[\mathbb{E}_{Y|X}[\mathbf 1_{Y=1} \mathbf 1_{f(X)=0} + \mathbf 1_{Y=0} \mathbf 1_{f(X)=1}|X]]  \\ 
 &= \mathbb{E}_{X}[\mathbf 1_{f(X)=0}\mathbb{E}_{Y|X}[\mathbf 1_{Y=1}] + \mathbf 1_{f(X)=1} \mathbb{E}_{Y|X}[\mathbf 1_{Y=0}|X]] \\
@@ -166,7 +172,9 @@ $$ Using "Tower Rule" conditioning on $X$ then using $\eta(X)$ definition: $$
 &=\mathbb{E}_{X}[(1-\mathbf 1_{f(X)=1})\eta(X) + \mathbf 1_{f(X)=1} (1-\eta(X))] \\
 &=\mathbb{E}_{X}[(\mathbf 1_{f(X)=1}(1-2\eta(X))] + \mathbb{E}_{X}[\eta(X))] \\
 \end{align*}
-$$ To minimize the risk with respect to $f$:
+$$ 
+
+To minimize the risk with respect to $f$:
 
 -   if $1-2\eta(X) \leq0$ (ie $\eta(X) \geq \frac{1}{2}$), we need $f(X)=1$
 
@@ -2280,7 +2288,7 @@ P_correctly_classified <- I_set %>%
 
 This is the same value we obtained with `ROCR` before using the command `performance`:
 
-```{{r}}
+```{r}
 auc_logit <- ROCR::performance(pred, measure = "auc")
 auc_logit <- auc_logit@y.values[[1]]
 ```
