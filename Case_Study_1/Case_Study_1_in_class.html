@@ -129,7 +129,7 @@ window.Quarto = {
   <li><a href="#exercise-7-decision-boundary-and-data-simulation" id="toc-exercise-7-decision-boundary-and-data-simulation" class="nav-link" data-scroll-target="#exercise-7-decision-boundary-and-data-simulation"><span class="header-section-number">1.6</span> Exercise 7: Decision boundary and data simulation</a>
   <ul class="collapse">
   <li><a href="#fit-a-logistic-regression-y-x1-x2-on-the-training-set-model1" id="toc-fit-a-logistic-regression-y-x1-x2-on-the-training-set-model1" class="nav-link" data-scroll-target="#fit-a-logistic-regression-y-x1-x2-on-the-training-set-model1"><span class="header-section-number">1.6.1</span> Fit a logistic regression (Y ~ x1 + x2) on the training set (model1)</a></li>
-  <li><a href="#boundary-decision-and-bayes-classifier" id="toc-boundary-decision-and-bayes-classifier" class="nav-link" data-scroll-target="#boundary-decision-and-bayes-classifier"><span class="header-section-number">1.6.2</span> Boundary decision and bayes classifier</a></li>
+  <li><a href="#bayes-classifier-and-decision-boundary" id="toc-bayes-classifier-and-decision-boundary" class="nav-link" data-scroll-target="#bayes-classifier-and-decision-boundary"><span class="header-section-number">1.6.2</span> Bayes Classifier and Decision Boundary</a></li>
   </ul></li>
   </ul></li>
   </ul>
@@ -1431,7 +1431,7 @@ Number of Fisher Scoring iterations: 12</code></pre>
 <div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["name"],"name":[1],"type":["chr"],"align":["left"]},{"label":["coefficient"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"(Intercept)","2":"-2.905382e+00"},{"1":"xint","2":"1.832814e-04"},{"1":"mktval","2":"-7.389577e-06"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["name"],"name":[1],"type":["chr"],"align":["left"]},{"label":["coefficient"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"(Intercept)","2":"-2.902730e+00"},{"1":"xint","2":"2.767817e-04"},{"1":"seq","2":"-2.431865e-06"},{"1":"mktval","2":"-9.964365e-06"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
@@ -1599,7 +1599,7 @@ $ r37    &lt;dbl&gt; 0.1897911, 0.1175842, 0.1152657, 1.0757807, 0.1308180, 0.35
 <span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(auc_table)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>, , model_altman_auc = 0.709031501340483, full_model_items_auc = 0.854138739946383, lasso_model_items_auc = 0.933394772117962
+<pre><code>, , model_altman_auc = 0.709031501340483, full_model_items_auc = 0.854138739946383, lasso_model_items_auc = 0.932389410187667
 
                       stepwise_model_desbois_auc
 full_model_desbois_auc 0.847436327077748
@@ -1802,18 +1802,32 @@ model2                  0.5125</code></pre>
 </div>
 <p>We see model2 performing slightly better, i.e.&nbsp;having a lower misclassification rate. Thus this model is preferred over model1.</p>
 </section>
-<section id="boundary-decision-and-bayes-classifier" class="level3" data-number="1.6.2">
-<h3 data-number="1.6.2" class="anchored" data-anchor-id="boundary-decision-and-bayes-classifier"><span class="header-section-number">1.6.2</span> Boundary decision and bayes classifier</h3>
-<p>to get the bayes boundary decision we do the following:</p>
-<p><strong>Derive the Bayes Decision Boundary</strong>:</p>
-<ul>
-<li>The Bayes decision boundary is derived from the posterior probabilities of the two classes. If we have two classes, 0 and 1, and we denote the class conditional densities as <span class="math inline">\(p(x∣Y=0)\)</span> and <span class="math inline">\(p(x∣Y=1)\)</span>, then the Bayes decision boundary occurs where the posterior probabilities are equal:</li>
-</ul>
-<p><span class="math inline">\(P(Y=0∣X=x)=P(Y=1∣X=x)P(Y = 0 | X = x)\)</span></p>
-<p>This can be rewritten as:</p>
-<p><span class="math inline">\(p(x∣Y=0)⋅P(Y=0)=p(x∣Y=1)⋅P(Y=1)\)</span></p>
-<p>In this case we have a data generating process where the multivariate gaussian distribution has no cross correlation, our <span class="math inline">\(\sigma_{1,2}\)</span> and <span class="math inline">\(\sigma_{2,1}\)</span> terms in our variance-covariance matrix <span class="math inline">\(\sum_0\)</span> and <span class="math inline">\(\sum_1\)</span> are <span class="math inline">\(0\)</span>. This implies, that to get the joint probability of being in class a or in class b, we can just add the marginal probabilities of being in class a or b respectively. This probability can then be compared to the probability of being in the other class, class 1. Thus, the higher probability will determine the estimate of Y for the bayesian estimator. Naturally, in our function, we use the definition of the PDF of the multivariate normal distribution <span class="math display">\[ f_{\boldsymbol{X}} (x_1, x_2) =  \frac{1}{(2 \pi)^{1/2} (\det(\sum))^{1/2}} \exp{(-\frac{1}{2} (x- \mu)^T (\sum)^{-1}(x- \mu))} \]</span>.</p>
-<p>Find below the Decision Boundary plot.</p>
+<section id="bayes-classifier-and-decision-boundary" class="level3" data-number="1.6.2">
+<h3 data-number="1.6.2" class="anchored" data-anchor-id="bayes-classifier-and-decision-boundary"><span class="header-section-number">1.6.2</span> Bayes Classifier and Decision Boundary</h3>
+<section id="derivation-of-the-bayes-decision-boundary" class="level4" data-number="1.6.2.1">
+<h4 data-number="1.6.2.1" class="anchored" data-anchor-id="derivation-of-the-bayes-decision-boundary"><span class="header-section-number">1.6.2.1</span> Derivation of the Bayes Decision Boundary</h4>
+<p>To derive the Bayes decision boundary for a classification problem, we start by considering the posterior probabilities of two classes, denoted as <span class="math inline">\(Y = 0\)</span> and <span class="math inline">\(Y = 1\)</span>. Let the class-conditional densities be <span class="math inline">\(p(x \mid Y = 0)\)</span> and <span class="math inline">\(p(x \mid Y = 1)\)</span>, respectively. The Bayes decision rule classifies a new observation <span class="math inline">\(x\)</span> by selecting the class with the higher posterior probability. The decision boundary occurs where these posterior probabilities are equal:</p>
+<p><span class="math display">\[ P(Y = 0 \mid X = x) = P(Y = 1 \mid X = x) \]</span></p>
+<p>By applying Bayes’ Theorem, this can be rewritten as:</p>
+<p><span class="math display">\[ p(x \mid Y = 0) \cdot P(Y = 0) = p(x \mid Y = 1) \cdot P(Y = 1)\]</span></p>
+<p>This equation defines the Bayes decision boundary, which is the set of points where the two classes are equally probable.</p>
+</section>
+<section id="multivariate-normal-distribution-case" class="level4" data-number="1.6.2.2">
+<h4 data-number="1.6.2.2" class="anchored" data-anchor-id="multivariate-normal-distribution-case"><span class="header-section-number">1.6.2.2</span> Multivariate Normal Distribution Case</h4>
+<p>Assuming that the data generating process for both classes follows a multivariate normal (Gaussian) distribution, we can further simplify this decision rule. In particular, let the covariance matrices for the two classes, <span class="math inline">\(\Sigma_0\)</span> and <span class="math inline">\(\Sigma_1\)</span>, be diagonal (i.e., the off-diagonal terms <span class="math inline">\(\sigma_{1,2}\)</span> and <span class="math inline">\(\sigma_{2,1}\)</span> are zero), indicating that the features are uncorrelated.</p>
+<p>In this case, the joint probability density function (PDF) for a multivariate normal distribution is given by:</p>
+<p><span class="math display">\[ f_{\boldsymbol{X}} (x_1, x_2) = \frac{1}{(2 \pi)^{d/2} (\det(\Sigma))^{1/2}} \exp\left(-\frac{1}{2} (\boldsymbol{x} - \boldsymbol{\mu})^T \Sigma^{-1} (\boldsymbol{x} - \boldsymbol{\mu})\right) \]</span></p>
+<p>where <span class="math inline">\(\boldsymbol{\mu}\)</span> is the mean vector and <span class="math inline">\(\Sigma\)</span> is the covariance matrix. For each class <span class="math inline">\(Y = 0\)</span> and <span class="math inline">\(Y = 1\)</span>, the class-conditional distributions follow this form with their respective parameters.</p>
+</section>
+<section id="bayesian-classification-rule" class="level4" data-number="1.6.2.3">
+<h4 data-number="1.6.2.3" class="anchored" data-anchor-id="bayesian-classification-rule"><span class="header-section-number">1.6.2.3</span> Bayesian Classification Rule</h4>
+<p>Given the assumption of independent features (diagonal covariance matrices), the total probability of an observation belonging to a class can be computed as the product of its marginal probabilities. Thus, the Bayes classifier compares the likelihood of an observation under each class:</p>
+<p><span class="math display">\[ \hat{Y} = \begin{cases}  0 &amp; \text{if } p(x \mid Y = 0) \cdot P(Y = 0) &gt; p(x \mid Y = 1) \cdot P(Y = 1) \\ 1 &amp; \text{otherwise} \end{cases} \]</span></p>
+<p>The class with the higher posterior probability will determine the classification outcome.</p>
+</section>
+<section id="decision-boundary-plot" class="level4" data-number="1.6.2.4">
+<h4 data-number="1.6.2.4" class="anchored" data-anchor-id="decision-boundary-plot"><span class="header-section-number">1.6.2.4</span> Decision Boundary Plot</h4>
+<p>The plot below shows the decision boundary that separates the two classes based on their posterior probabilities. This boundary is determined by the equality of the likelihood functions of the two multivariate normal distributions.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -1892,7 +1906,8 @@ model2                  0.5125</code></pre>
 </div>
 </div>
 </div>
-<p>As shown above, we see the Bayes boundary decision optimally cutting the data, with the simple model1 being shown in dark green and model2 being shown in purple.</p>
+<p>The decision boundary plot illustrates the classification of two distinct classes, represented by blue and orange circular markers. These points show some overlap, especially in the central region, indicating classification challenges. The <strong>light gray line</strong> represents the <strong>Bayes decision boundary</strong>, which separates the two classes based on posterior probabilities, providing the optimal theoretical boundary where the probabilities of both classes are equal. The <strong>green vertical line</strong> represents <strong>model1</strong> as before, the simple logistic regression model using only two variables, which results in a linear decision boundary. The <strong>purple curve</strong> represents <strong>model2</strong>, the more complex logistic model that includes the original two variables as well as their squared terms and combinations, resulting in a non-linear decision boundary that better adapts to the data distribution. The contrast between the boundaries highlights how including interaction terms and non-linear combinations can lead to a more flexible and accurate classification model compared to a simpler, linear approach. ultimately, we see that the non-linear model2 performs better than model1 and is closer to the Bayes decision boundary.</p>
+</section>
 </section>
 </section>
 </section>

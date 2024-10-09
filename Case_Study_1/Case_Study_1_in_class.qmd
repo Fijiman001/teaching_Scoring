@@ -717,23 +717,41 @@ print(misclassification_errors_df)
 
 We see model2 performing slightly better, i.e. having a lower misclassification rate. Thus this model is preferred over model1.
 
-### Boundary decision and bayes classifier
+### Bayes Classifier and Decision Boundary
 
-to get the bayes boundary decision we do the following:
+#### Derivation of the Bayes Decision Boundary
 
-**Derive the Bayes Decision Boundary**:
+To derive the Bayes decision boundary for a classification problem, we start by considering the posterior probabilities of two classes, denoted as $Y = 0$ and $Y = 1$. Let the class-conditional densities be $p(x \mid Y = 0)$ and $p(x \mid Y = 1)$, respectively. The Bayes decision rule classifies a new observation $x$ by selecting the class with the higher posterior probability. The decision boundary occurs where these posterior probabilities are equal:
 
--   The Bayes decision boundary is derived from the posterior probabilities of the two classes. If we have two classes, 0 and 1, and we denote the class conditional densities as $p(x∣Y=0)$ and $p(x∣Y=1)$, then the Bayes decision boundary occurs where the posterior probabilities are equal:
+$$ P(Y = 0 \mid X = x) = P(Y = 1 \mid X = x) $$
 
-$P(Y=0∣X=x)=P(Y=1∣X=x)P(Y = 0 | X = x)$
+By applying Bayes' Theorem, this can be rewritten as:
 
-This can be rewritten as:
+$$ p(x \mid Y = 0) \cdot P(Y = 0) = p(x \mid Y = 1) \cdot P(Y = 1)$$
 
-$p(x∣Y=0)⋅P(Y=0)=p(x∣Y=1)⋅P(Y=1)$
+This equation defines the Bayes decision boundary, which is the set of points where the two classes are equally probable.
 
-In this case we have a data generating process where the multivariate gaussian distribution has no cross correlation, our $\sigma_{1,2}$ and $\sigma_{2,1}$ terms in our variance-covariance matrix $\sum_0$ and $\sum_1$ are $0$. This implies, that to get the joint probability of being in class a or in class b, we can just add the marginal probabilities of being in class a or b respectively. This probability can then be compared to the probability of being in the other class, class 1. Thus, the higher probability will determine the estimate of Y for the bayesian estimator. Naturally, in our function, we use the definition of the PDF of the multivariate normal distribution $$ f_{\boldsymbol{X}} (x_1, x_2) =  \frac{1}{(2 \pi)^{1/2} (\det(\sum))^{1/2}} \exp{(-\frac{1}{2} (x- \mu)^T (\sum)^{-1}(x- \mu))} $$.
+#### Multivariate Normal Distribution Case
 
-Find below the Decision Boundary plot.
+Assuming that the data generating process for both classes follows a multivariate normal (Gaussian) distribution, we can further simplify this decision rule. In particular, let the covariance matrices for the two classes, $\Sigma_0$ and $\Sigma_1$, be diagonal (i.e., the off-diagonal terms $\sigma_{1,2}$ and $\sigma_{2,1}$ are zero), indicating that the features are uncorrelated.
+
+In this case, the joint probability density function (PDF) for a multivariate normal distribution is given by:
+
+$$ f_{\boldsymbol{X}} (x_1, x_2) = \frac{1}{(2 \pi)^{d/2} (\det(\Sigma))^{1/2}} \exp\left(-\frac{1}{2} (\boldsymbol{x} - \boldsymbol{\mu})^T \Sigma^{-1} (\boldsymbol{x} - \boldsymbol{\mu})\right) $$
+
+where $\boldsymbol{\mu}$ is the mean vector and $\Sigma$ is the covariance matrix. For each class $Y = 0$ and $Y = 1$, the class-conditional distributions follow this form with their respective parameters.
+
+#### Bayesian Classification Rule
+
+Given the assumption of independent features (diagonal covariance matrices), the total probability of an observation belonging to a class can be computed as the product of its marginal probabilities. Thus, the Bayes classifier compares the likelihood of an observation under each class:
+
+$$ \hat{Y} = \begin{cases}  0 & \text{if } p(x \mid Y = 0) \cdot P(Y = 0) > p(x \mid Y = 1) \cdot P(Y = 1) \\ 1 & \text{otherwise} \end{cases} $$
+
+The class with the higher posterior probability will determine the classification outcome.
+
+#### Decision Boundary Plot
+
+The plot below shows the decision boundary that separates the two classes based on their posterior probabilities. This boundary is determined by the equality of the likelihood functions of the two multivariate normal distributions.
 
 ```{r}
 library(tidyverse)
@@ -804,4 +822,4 @@ scale_colour_manual(values = c("dodgerblue", "orange")) +
 theme_void()
 ```
 
-As shown above, we see the Bayes boundary decision optimally cutting the data, with the simple model1 being shown in dark green and model2 being shown in purple.
+The decision boundary plot illustrates the classification of two distinct classes, represented by blue and orange circular markers. These points show some overlap, especially in the central region, indicating classification challenges. The **light gray line** represents the **Bayes decision boundary**, which separates the two classes based on posterior probabilities, providing the optimal theoretical boundary where the probabilities of both classes are equal. The **green vertical line** represents **model1** as before, the simple logistic regression model using only two variables, which results in a linear decision boundary. The **purple curve** represents **model2**, the more complex logistic model that includes the original two variables as well as their squared terms and combinations, resulting in a non-linear decision boundary that better adapts to the data distribution. The contrast between the boundaries highlights how including interaction terms and non-linear combinations can lead to a more flexible and accurate classification model compared to a simpler, linear approach. ultimately, we see that the non-linear model2 performs better than model1 and is closer to the Bayes decision boundary.
